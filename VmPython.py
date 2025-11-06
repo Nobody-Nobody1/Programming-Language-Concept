@@ -1,34 +1,29 @@
-class TinyVM:
+class SimpleVM:
     def __init__(self):
         self.stack = []
         self.memory = {}
         self.program_counter = 0
 
-    def run(self, bytecode):
+    def execute(self, bytecode):
         while self.program_counter < len(bytecode):
             instruction = bytecode[self.program_counter]
-            opcode = instruction[0]
-
-            if opcode == "PUSH":
-                value = instruction[1]
+            # Implement logic for different opcodes (e.g., PUSH, ADD, STORE, LOAD)
+            if instruction == "PUSH":
+                value = bytecode[self.program_counter + 1]
                 self.stack.append(value)
-            elif opcode == "ADD":
-                b = self.stack.pop()
-                a = self.stack.pop()
-                self.stack.append(a + b)
-            elif opcode == "PRINT":
-                print(self.stack.pop())
-            # ... other opcodes
+                self.program_counter += 2
+            elif instruction == "ADD":
+                operand2 = self.stack.pop()
+                operand1 = self.stack.pop()
+                self.stack.append(operand1 + operand2)
+                self.program_counter += 1
+            # ... other instructions
+            else:
+                raise ValueError(f"Unknown instruction: {instruction}")
 
-            self.program_counter += 1
+# Example bytecode (simplified)
+bytecode = ["PUSH", 5, "PUSH", 3, "ADD"]
 
-# Example Bytecode
-bytecode = [
-    ("PUSH", 5),
-    ("PUSH", 10),
-    ("ADD"),
-    ("PRINT")
-]
-
-vm = TinyVM()
-vm.run(bytecode)
+vm = SimpleVM()
+vm.execute(bytecode)
+print(vm.stack) # Output: [8]
