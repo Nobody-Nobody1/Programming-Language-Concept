@@ -1,0 +1,7 @@
+nohup: ignoring input
+/workspaces/Virtual-Machine/vm_web.py:16: DeprecationWarning: 'cgi' is deprecated and slated for removal in Python 3.13
+  import cgi
+127.0.0.1 - - [06/Nov/2025 21:04:51] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [06/Nov/2025 21:05:03] "POST /load_text HTTP/1.1" 200 -
+127.0.0.1 - - [06/Nov/2025 21:05:04] "GET /state HTTP/1.1" 200 -
+127.0.0.1 - - [06/Nov/2025 21:05:10] "GET / HTTP/1.1" 200 -
