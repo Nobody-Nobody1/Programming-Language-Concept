@@ -22,16 +22,6 @@ class SimpleVM:
                 operand1 = self.stack.pop()
                 self.stack.append(operand1 - operand2)
                 self.program_counter += 1
-            elif instruction == "SAVE":
-                address = bytecode[self.program_counter + 1]
-                value = self.stack.pop()
-                self.memory[address] = value
-                self.program_counter += 2
-            elif instruction == "LOAD":
-                address = bytecode[self.program_counter + 1]
-                value = self.memory.get(address, 0)
-                self.stack.append(value)
-                self.program_counter += 2
             elif instruction == "DIVIDE":
                 operand2 = self.stack.pop()
                 operand1 = self.stack.pop()
@@ -44,12 +34,10 @@ class SimpleVM:
                 operand1 = self.stack.pop()
                 self.stack.append(operand1 * operand2)
                 self.program_counter += 1
+            elif instruction == "PRINT":
+                value = self.stack.pop()
+                print(value)
+                self.program_counter += 1
+            
             else:
                 raise ValueError(f"Unknown instruction: {instruction}")
-
-# Example bytecode (simplified)
-bytecode = ["PUSH", 5, "PUSH", 3, "SUBTRACT", "SAVE", 0, "LOAD", 0, "PUSH", 2, "ADD"]
-
-vm = SimpleVM()
-vm.execute(bytecode)
-print(vm.stack) # Output: [8]

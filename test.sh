@@ -1,1 +1,1 @@
-python3 ByteCodeReader.py
+python3 VmExecuter.py
