@@ -7,7 +7,7 @@ class SimpleVM:
     def execute(self, bytecode):
         while self.program_counter < len(bytecode):
             instruction = bytecode[self.program_counter]
-            # Implement logic for different opcodes (e.g., PUSH, ADD, STORE, LOAD)
+            # Implement logic for different opcodes (e.g., PUSH, ADD, SUBTRACT)
             if instruction == "PUSH":
                 value = bytecode[self.program_counter + 1]
                 self.stack.append(value)
@@ -43,10 +43,6 @@ class SimpleVM:
                 operand2 = self.stack.pop()
                 operand1 = self.stack.pop()
                 self.stack.append(operand1 * operand2)
-                self.program_counter += 1
-            elif instruction == "PRINT":
-                value = self.stack.pop()
-                print(value)
                 self.program_counter += 1
             else:
                 raise ValueError(f"Unknown instruction: {instruction}")
