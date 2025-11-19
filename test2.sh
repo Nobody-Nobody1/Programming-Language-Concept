@@ -1,1 +1,1 @@
-phython3 
+python3 Vm_gui.py 
