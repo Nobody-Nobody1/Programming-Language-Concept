@@ -8,14 +8,22 @@ This avoids Tkinter/X11 and works in headless/container environments.
 """
 
 import json
+HTML = b'''<!doctype html>
+<html>
+#!/usr/bin/env python3
+"""
+Minimal web GUI for the VM: shows Stack and Memory and accepts pasted commands.
+Run: python3 vm_web.py
+Open: http://localhost:8000/
+"""
+
+import json
 import threading
 import time
+import os
+import tempfile
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import parse_qs
-from io import BytesIO
-import cgi
-import tempfile
-import os
 
 from VmPython import SimpleVM
 import ByteCodeReader
@@ -28,136 +36,112 @@ bytecode = []
 vm_lock = threading.Lock()
 run_flag = threading.Event()
 
-HTML = b'''<!doctype html>
+HTML = """<!doctype html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Simple VM Web GUI</title>
-    <style>
-        body { font-family: sans-serif; margin: 16px }
-        .col { float:left; margin-right: 20px }
-        pre { background: #f7f7f7; padding: 10px }
-        button { margin: 4px }
-        .clear { clear: both }
-    </style>
-</head>
-<body>
-    <h2>Simple VM Web GUI</h2>
-    <div class="col">
-        <div>
-            <button onclick="doAction('load')">Load ByteCode.txt</button>
-            <button onclick="doAction('reset')">Reset</button>
+    #!/usr/bin/env python3
+    """
+    Minimal web GUI for the VM: shows Stack and Memory and accepts pasted commands.
+    Run: python3 vm_web.py
+    Open: http://localhost:8000/
+    """
+
+    import json
+    import threading
+    import time
+    import os
+    import tempfile
+    from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
+    from urllib.parse import parse_qs
+
+    from VmPython import SimpleVM
+    import ByteCodeReader
+
+    HOST = '0.0.0.0'
+    PORT = 8000
+
+    vm = SimpleVM()
+    bytecode = []
+    vm_lock = threading.Lock()
+    run_flag = threading.Event()
+
+    HTML = """<!doctype html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <title>VM Stack/Memory</title>
+        <style>
+            body { font-family: sans-serif; margin: 12px }
+            textarea { width: 100%; box-sizing: border-box }
+            pre { background: #f7f7f7; padding: 8px; white-space: pre-wrap }
+            .row { display:flex; gap:12px }
+            .col { flex:1 }
+            button { margin-top:8px }
+        </style>
+    </head>
+    <body>
+        <h3>VM Live View</h3>
+        <div class="row">
+            <div class="col">
+                <h4>Stack</h4>
+                <pre id="stack">[]</pre>
+            </div>
+            <div class="col">
+                <h4>Memory</h4>
+                <pre id="memory">{}</pre>
+            </div>
         </div>
-        <div style="margin-top:8px">Status: <span id="status">idle</span></div>
+
+        <h4>Commands (one per line)</h4>
+        <textarea id="bytebox" rows="10" placeholder="PUSH\n5\nPRINT\n"></textarea>
         <div>
+            <button onclick="loadText()">Load & Reset</button>
             <button onclick="doAction('step')">Step</button>
             <button onclick="doAction('run')">Run</button>
             <button onclick="doAction('stop')">Stop</button>
+            <span style="margin-left:12px">Status: <strong id="status">idle</strong></span>
         </div>
-        <h3>Program Counter / Instruction</h3>
-        <div id="pc">pc: -</div>
-        <h3>Stack</h3>
-        <pre id="stack">[]</pre>
-        <h3>Memory</h3>
-        <pre id="memory">{}</pre>
-        <h3>Console</h3>
-        <pre id="console"></pre>
-    </div>
-    <div class="col">
-            <h3>Bytecode</h3>
-            <pre id="bytecode"></pre>
-            <h3>Paste bytecode text</h3>
-            <textarea id="bytebox" rows="12" cols="40" placeholder="PUSH\n5\nPRINT\n"></textarea>
-            <div>
-                <button onclick="loadText()">Load from text</button>
-            </div>
-    </div>
-    <div class="clear"></div>
 
-<script>
-let runState = false;
-async function doAction(act) {
-    const res = await fetch('/' + act, { method: 'POST' });
-    const txt = await res.text();
-    // append to console if present
-    if (txt) {
-        const c = document.getElementById('console');
-        c.textContent += txt + '\n';
-        c.scrollTop = c.scrollHeight;
+    <script>
+    async function doAction(act) {
+        const res = await fetch('/' + act, { method: 'POST' });
+        const txt = await res.text();
+        setStatus(txt || act + ' OK');
     }
-    setStatus(txt || act + ' OK');
-}
 
-async function loadText() {
-    const txtarea = document.getElementById('bytebox');
-    const text = txtarea.value;
-    if (!text) { alert('Paste some bytecode into the box first'); return; }
-    const res = await fetch('/load_text', { method: 'POST', body: text });
-    const txt = await res.text();
-    if (txt) {
-        const c = document.getElementById('console');
-        c.textContent += txt + '\n';
-        c.scrollTop = c.scrollHeight;
+    async function loadText() {
+        const text = document.getElementById('bytebox').value;
+        if (!text) return setStatus('no text');
+        const res = await fetch('/load_text', { method: 'POST', body: text });
+        const txt = await res.text();
+        setStatus(txt || 'loaded');
     }
-    setStatus(txt || 'loaded');
-}
 
-function setStatus(s) {
-    const st = document.getElementById('status');
-    if (!st) return;
-    st.textContent = s;
-    // briefly highlight
-    st.style.transition = 'none';
-    st.style.background = '#ffd';
-    setTimeout(()=>{ st.style.transition='background 0.6s'; st.style.background='transparent'; }, 50);
-}
-
-// Real-time updates via Server-Sent Events
-if (typeof EventSource !== 'undefined') {
-    const es = new EventSource('/stream');
-    es.onmessage = function(e) {
-        try {
-            const j = JSON.parse(e.data);
-            document.getElementById('pc').textContent = 'pc: ' + j.program_counter + (j.halted ? ' (halted)' : '');
-            document.getElementById('stack').textContent = JSON.stringify(j.stack, null, 2);
-            document.getElementById('memory').textContent = JSON.stringify(j.memory, null, 2);
-            document.getElementById('bytecode').textContent = JSON.stringify(j.bytecode, null, 2);
-            if (j.console_lines && j.console_lines.length) {
-                const c = document.getElementById('console');
-                for (const line of j.console_lines) c.textContent += line + '\n';
-                c.scrollTop = c.scrollHeight;
-            }
-        } catch(err) {
-            console.error('SSE parse error', err);
-        }
-    };
-    es.onerror = function() { /* ignore, SSE will reconnect in browsers */ };
-} else {
-    // fallback polling
-    setInterval(update, 500);
-}
-
-async function update() {
-    const res = await fetch('/state');
-    if (!res.ok) return;
-    const j = await res.json();
-    document.getElementById('pc').textContent = 'pc: ' + j.program_counter + (j.halted ? ' (halted)' : '');
-    document.getElementById('stack').textContent = JSON.stringify(j.stack, null, 2);
-    document.getElementById('memory').textContent = JSON.stringify(j.memory, null, 2);
-    document.getElementById('bytecode').textContent = JSON.stringify(j.bytecode, null, 2);
-    if (j.console_lines && j.console_lines.length) {
-        const c = document.getElementById('console');
-        for (const line of j.console_lines) c.textContent += line + '\n';
-        c.scrollTop = c.scrollHeight;
+    function setStatus(s) {
+        const el = document.getElementById('status');
+        if (!el) return;
+        el.textContent = s;
     }
-}
 
-setInterval(update, 500);
-window.onload = update;
-</script>
-</body>
-</html>
-'''
+    // SSE updates for stack/memory
+    if (typeof EventSource !== 'undefined') {
+        const es = new EventSource('/stream');
+        es.onmessage = function(e) {
+            try {
+                const j = JSON.parse(e.data);
+                document.getElementById('stack').textContent = JSON.stringify(j.stack, null, 2);
+                document.getElementById('memory').textContent = JSON.stringify(j.memory, null, 2);
+                if (j.console_lines && j.console_lines.length) setStatus(j.console_lines.slice(-1)[0]);
+            } catch (err) { console.error(err); }
+        };
+    }
+    </script>
+    </body>
+    </html>
+    """
+            cls._lines.clear()
+            return lines
 
 
 class VMHandler(BaseHTTPRequestHandler):
@@ -269,7 +253,6 @@ class VMHandler(BaseHTTPRequestHandler):
             return
 
         if self.path == '/load':
-            # optional: parse filename from body
             fn = 'ByteCode.txt'
             if body:
                 try:
@@ -289,49 +272,10 @@ class VMHandler(BaseHTTPRequestHandler):
             self.wfile.write(body)
             return
 
-        if self.path == '/upload':
-            # handle multipart form upload
-            try:
-                fs = cgi.FieldStorage(fp=self.rfile, headers=self.headers, environ={
-                    'REQUEST_METHOD': 'POST',
-                    'CONTENT_TYPE': self.headers.get('Content-Type')
-                })
-                if 'file' not in fs:
-                    raise ValueError('no file field')
-                fileitem = fs['file']
-                if not fileitem.file:
-                    raise ValueError('empty file')
-                # save to temporary file
-                with tempfile.NamedTemporaryFile(delete=False, prefix='vm_upload_', dir='.') as tf:
-                    data = fileitem.file.read()
-                    tf.write(data)
-                    tmpname = tf.name
-                try:
-                    with vm_lock:
-                        bytecode = ByteCodeReader.read_text_file_to_list(tmpname)
-                        vm.reset()
-                    body = f'Uploaded and loaded {os.path.basename(tmpname)}'.encode('utf-8')
-                finally:
-                    # remove the temporary file after loading
-                    try:
-                        os.unlink(tmpname)
-                    except Exception:
-                        pass
-            except Exception as e:
-                body = f'Upload error: {e}'.encode('utf-8')
-            self.send_response(200)
-            self.send_header('Content-Type', 'text/plain; charset=utf-8')
-            self.send_header('Content-Length', str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
-            return
-
         if self.path == '/load_text':
-            # body is raw text containing the bytecode lines
             try:
                 if not body:
                     raise ValueError('empty request body')
-                # Save text to a temporary file and load using ByteCodeReader
                 with tempfile.NamedTemporaryFile(delete=False, prefix='vm_text_', dir='.') as tf:
                     if isinstance(body, bytes):
                         tf.write(body)
@@ -344,7 +288,6 @@ class VMHandler(BaseHTTPRequestHandler):
                         vm.reset()
                     body = f'Loaded text into {os.path.basename(tmpname)}'.encode('utf-8')
                 finally:
-                    # remove temp file after loading
                     try:
                         os.unlink(tmpname)
                     except Exception:
@@ -362,25 +305,7 @@ class VMHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
 
-class ConsoleBuffer:
-    _lock = threading.Lock()
-    _lines = []
-
-    @classmethod
-    def append(cls, s):
-        with cls._lock:
-            cls._lines.append(str(s))
-
-    @classmethod
-    def get_and_clear(cls):
-        with cls._lock:
-            lines = cls._lines.copy()
-            cls._lines.clear()
-            return lines
-
-
 def run_thread():
-    # Run VM until stopped or halted
     try:
         while run_flag.is_set():
             with vm_lock:
