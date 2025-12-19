@@ -6,25 +6,56 @@ class SimpleVM:
         self.program = 0
     
     def execute(self, bytecode):
-        for instruction in bytecode:
-            if instruction == "PUSH": #adds next value from bytecode to stack
+        self.program = 0  # Reset program counter
+        while self.program < len(bytecode):
+            instruction = bytecode[self.program]
+            if instruction == 0x10:  # PUSH instruction or 16
                 value = bytecode[self.program + 1]
                 self.stack.append(value)
-            elif instruction == "POP": #removes top value from stack
-                self.stack.pop()
-            elif instruction == "ADD": #adds top two values on stack
-                b = self.stack.pop()
-                a = self.stack.pop()
-                self.stack.append(a + b)
-            elif instruction == "MUL": #multiplies top two values on stack
-                b = self.stack.pop()
-                a = self.stack.pop()
-                self.stack.append(a * b)
-            elif instruction == "PRINT": # prints top value of stack
-                print("Print :)")
-            elif instruction == "PROGRAM_CHECK": # prints program check message
-                print("Program Check :)")
+                self.program += 2
+            elif instruction == 0x20:  # ADD instruction or 32
+                if len(self.stack) >= 2:
+                    b = self.stack.pop()
+                    a = self.stack.pop()
+                    self.stack.append(a + b)
+                    self.program += 1
+                else:
+                    raise ValueError("Stack underflow in ADD instruction")
+            elif instruction == 0x30:  # SUB instruction or 48
+                if len(self.stack) >= 2:
+                    b = self.stack.pop()
+                    a = self.stack.pop()
+                    self.stack.append(a - b)
+                    self.program += 1
+                else:
+                    raise ValueError("Stack underflow in SUB instruction")
+            elif instruction == 0x40:  # MUL instruction or 64
+                if len(self.stack) >= 2:
+                    b = self.stack.pop()
+                    a = self.stack.pop()
+                    self.stack.append(a * b)
+                    self.program += 1
+                else:
+                    raise ValueError("Stack underflow in MUL instruction")
+            elif instruction == 0x50:  # DIV instruction or 80
+                if len(self.stack) >= 2:
+                    b = self.stack.pop()
+                    a = self.stack.pop()
+                    if b != 0:
+                        self.stack.append(a // b)
+                        self.program += 1
+                    else:
+                        raise ZeroDivisionError("Division by zero")
+                else:
+                    raise ValueError("Stack underflow in DIV instruction")
+            elif instruction == 0x60:  # HALT instruction or 96
+                break
+            elif instruction == 0x70:  # PRINT instruction or 112
+                if self.stack:
+                    print(self.stack.pop())
+                    self.program += 1
+                else:
+                    raise ValueError("Stack underflow in PRINT instruction")
             else:
-                raise ValueError(f"Unknown instruction: {instruction}") #raises error for unknown
-        else:
-            return self.stack #returns final stack after execution
+                raise ValueError(f"Unknown instruction: {instruction}")
+        return self.stack
