@@ -20,9 +20,9 @@ class SimpleVM:
                 a = self.stack.pop()
                 self.stack.append(a * b)
             elif instruction == "PRINT": # prints top value of stack
-                print(self.stack)
-            elif instruction == "PROGRAM_CHECK": # checks if top value of stack is 0
-                if self.stack[-1] == 0: # if top value is 0, program raises error
-                    raise ValueError("Program check failed")
+                value = self.stack
+                print(value)
+            elif instruction == "PROGRAM_CHECK": # prints program check message
+                print("Program Check :)")
             else:
                 raise ValueError(f"Unknown instruction: {instruction}") #raises error for unknown
