@@ -13,6 +13,7 @@ class SimpleVM:
                 value = bytecode[self.program + 1]
                 self.stack.append(value)
                 self.program += 2
+
             elif instruction == 0x20:  # ADD instruction or 32
                 if len(self.stack) >= 2:
                     b = self.stack.pop()
@@ -21,6 +22,7 @@ class SimpleVM:
                     self.program += 1
                 else:
                     raise ValueError("Stack underflow in ADD instruction")
+                
             elif instruction == 0x30:  # SUB instruction or 48
                 if len(self.stack) >= 2:
                     b = self.stack.pop()
@@ -29,6 +31,7 @@ class SimpleVM:
                     self.program += 1
                 else:
                     raise ValueError("Stack underflow in SUB instruction")
+                
             elif instruction == 0x40:  # MUL instruction or 64
                 if len(self.stack) >= 2:
                     b = self.stack.pop()
@@ -37,6 +40,7 @@ class SimpleVM:
                     self.program += 1
                 else:
                     raise ValueError("Stack underflow in MUL instruction")
+                
             elif instruction == 0x50:  # DIV instruction or 80
                 if len(self.stack) >= 2:
                     b = self.stack.pop()
@@ -48,14 +52,17 @@ class SimpleVM:
                         raise ZeroDivisionError("Division by zero")
                 else:
                     raise ValueError("Stack underflow in DIV instruction")
+                
             elif instruction == 0x60:  # HALT instruction or 96
                 break
+
             elif instruction == 0x70:  # PRINT instruction or 112
                 if self.stack:
                     print(self.stack.pop())
                     self.program += 1
                 else:
                     raise ValueError("Stack underflow in PRINT instruction")
+                
             else:
                 raise ValueError(f"Unknown instruction: {instruction}")
         return self.stack
