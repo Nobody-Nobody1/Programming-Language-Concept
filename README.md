@@ -1,4 +1,4 @@
-virtual machine using hexadecimal commands
-PUSH is 16 and allows you to push the next line after it to self.stack
-ADD is 32 and allows you to add the top 2 values in self.stack
-SUB is 48 and allows you to subtract the top 2 values in self.stack
+virtual machine using hexadecimal commands /n
+PUSH is 16 and allows you to push the next line after it to self.stack /n
+ADD is 32 and allows you to add the top 2 values in self.stack /n
+SUB is 48 and allows you to subtract the top 2 values in self.stack /n
