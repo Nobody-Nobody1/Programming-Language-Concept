@@ -1,5 +1,7 @@
 virtual machine using hexadecimal commands
 
+run test.sh for actual script and test2.sh to see ByteCodeReader.py convert Bytecode.txt to array
+
 PUSH is 16 and allows you to push the next line after it to self.stack
 
 ADD is 32 and allows you to add the top 2 values in self.stack
@@ -13,3 +15,10 @@ DIV is 80 and allows you to divide the top 2 values in self.stack
 HALT is 96 and stops when it reaches this
 
 PRINT is 112 and prints self.stack
+
+CLEAR is 128 and clears self.stack fully
+
+STORE is 144 and removes last index and writes to vm_store.txt
+
+LOAD is 160 and adds whatever is in vm_store.txt
+

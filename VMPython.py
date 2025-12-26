@@ -1,5 +1,3 @@
-import ByteCodeReader
-
 class SimpleVM:
     def __init__(self):
         self.stack = []
@@ -7,8 +5,13 @@ class SimpleVM:
     
     def execute(self, bytecode):
         self.program = 0  # Reset program counter
-        while self.program < len(bytecode):
+        
+        bytecode_length = len(bytecode)
+
+        while self.program < bytecode_length:
+
             instruction = bytecode[self.program]
+
             if instruction == 0x10:  # PUSH instruction or 16
                 value = bytecode[self.program + 1]
                 self.stack.append(value)
@@ -62,7 +65,29 @@ class SimpleVM:
                     self.program += 1
                 else:
                     raise ValueError("Stack underflow in PRINT instruction")
+                
+            elif instruction == 0x80:  # CLEAR instruction or 128
+                self.stack.clear()
+                self.program += 1
             
-        else:
-                raise ValueError(f"Unknown instruction: {instruction}")
+            elif instruction == 0x90:  # STORE instruction or 144
+                if self.stack:
+                    value = self.stack.pop()
+                    with open('vm_store.txt', 'w') as f:
+                        f.write(str(value))
+                    self.program += 1
+                else:
+                    raise ValueError("Stack underflow in STORE instruction")
+                
+            elif instruction == 0xA0:  # LOAD instruction or 160
+                try:
+                    with open('vm_store.txt', 'r') as f:
+                        value = int(f.read())
+                    self.stack.append(value)
+                    self.program += 1
+                except FileNotFoundError:
+                    raise FileNotFoundError("No stored value found for LOAD instruction")
+                
+            else:
+                raise ValueError(f"Unknown instruction {instruction} at position {self.program}")
         return self.stack
