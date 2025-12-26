@@ -12,12 +12,12 @@ class SimpleVM:
 
             instruction = bytecode[self.program]
 
-            if instruction == 0x10:  # PUSH instruction or 16
+            if instruction == 0x10 or "PUSH":  # PUSH instruction or 16
                 value = bytecode[self.program + 1]
                 self.stack.append(value)
                 self.program += 2
 
-            elif instruction == 0x20:  # ADD instruction or 32
+            elif instruction == 0x20 or "ADD":  # ADD instruction or 32
                 if len(self.stack) >= 2:
                     b = self.stack.pop()
                     a = self.stack.pop()
@@ -26,7 +26,7 @@ class SimpleVM:
                 else:
                     raise ValueError("Stack underflow in ADD instruction")
                 
-            elif instruction == 0x30:  # SUB instruction or 48
+            elif instruction == 0x30 or "SUB":  # SUB instruction or 48
                 if len(self.stack) >= 2:
                     b = self.stack.pop()
                     a = self.stack.pop()
@@ -35,7 +35,7 @@ class SimpleVM:
                 else:
                     raise ValueError("Stack underflow in SUB instruction")
                 
-            elif instruction == 0x40:  # MUL instruction or 64
+            elif instruction == 0x40 or "MUL":  # MUL instruction or 64
                 if len(self.stack) >= 2:
                     b = self.stack.pop()
                     a = self.stack.pop()
@@ -44,7 +44,7 @@ class SimpleVM:
                 else:
                     raise ValueError("Stack underflow in MUL instruction")
                 
-            elif instruction == 0x50:  # DIV instruction or 80
+            elif instruction == 0x50 or "DIV":  # DIV instruction or 80
                 if len(self.stack) >= 2:
                     b = self.stack.pop()
                     a = self.stack.pop()
@@ -56,21 +56,21 @@ class SimpleVM:
                 else:
                     raise ValueError("Stack underflow in DIV instruction")
                 
-            elif instruction == 0x60:  # HALT instruction or 96
+            elif instruction == 0x60 or "HALT":  # HALT instruction or 96
                 break
 
-            elif instruction == 0x70:  # PRINT instruction or 112
+            elif instruction == 0x70 or "PRINT":  # PRINT instruction or 112
                 if self.stack:
                     print(self.stack.pop())
                     self.program += 1
                 else:
                     raise ValueError("Stack underflow in PRINT instruction")
                 
-            elif instruction == 0x80:  # CLEAR instruction or 128
+            elif instruction == 0x80 or "CLEAR":  # CLEAR instruction or 128
                 self.stack.clear()
                 self.program += 1
             
-            elif instruction == 0x90:  # STORE instruction or 144
+            elif instruction == 0x90 or "STORE":  # STORE instruction or 144
                 if self.stack:
                     value = self.stack.pop()
                     with open('vm_store.txt', 'w') as f:
@@ -79,7 +79,7 @@ class SimpleVM:
                 else:
                     raise ValueError("Stack underflow in STORE instruction")
                 
-            elif instruction == 0xA0:  # LOAD instruction or 160
+            elif instruction == 0xA0 or "LOAD":  # LOAD instruction or 160
                 try:
                     with open('vm_store.txt', 'r') as f:
                         value = int(f.read())
@@ -88,11 +88,11 @@ class SimpleVM:
                 except FileNotFoundError:
                     raise FileNotFoundError("No stored value found for LOAD instruction")
 
-            elif instruction == 0xB0: # JUMP instruction or 176
+            elif instruction == 0xB0 or "JUMP": # JUMP instruction or 176
                 target = bytecode[self.program + 1]
                 self.program = target
 
-            elif instruction == 0xC0: # JUMPIFZERO instruction or 192
+            elif instruction == 0xC0 or "JUMPIFZERO": # JUMPIFZERO instruction or 192
                 if self.stack:
                     value = self.stack.pop()
                     target = bytecode[self.program + 1]

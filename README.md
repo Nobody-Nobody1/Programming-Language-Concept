@@ -1,4 +1,4 @@
-virtual machine using hexadecimal commands
+virtual machine using hexadecimal commands or text commands
 
 run test.sh for actual script and test2.sh to see ByteCodeReader.py convert Bytecode.txt to array
 
