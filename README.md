@@ -22,3 +22,6 @@ STORE is 144 and removes last index and writes to vm_store.txt
 
 LOAD is 160 and adds whatever is in vm_store.txt
 
+JUMP is 176 and jumps to whatever line the next command is
+
+JUMPIFZERO is 192 and checks whether popped value from self.stack is 0, if so then it jumps to whatever line the next command is else it doesn't do anything

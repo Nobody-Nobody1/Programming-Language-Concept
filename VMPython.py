@@ -87,7 +87,22 @@ class SimpleVM:
                     self.program += 1
                 except FileNotFoundError:
                     raise FileNotFoundError("No stored value found for LOAD instruction")
-                
+
+            elif instruction == 0xB0: # JUMP instruction or 176
+                target = bytecode[self.program + 1]
+                self.program = target
+
+            elif instruction == 0xC0: # JUMPIFZERO instruction or 192
+                if self.stack:
+                    value = self.stack.pop()
+                    target = bytecode[self.program + 1]
+                    if value == 0:
+                        self.program = target
+                    else:
+                        self.program += 2
+                else:
+                    raise ValueError("Stack underflow in JUMPIFZERO instruction")
+
             else:
                 raise ValueError(f"Unknown instruction {instruction} at position {self.program}")
         return self.stack
