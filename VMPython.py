@@ -62,11 +62,7 @@ class SimpleVM:
                     self.program += 1
                 else:
                     raise ValueError("Stack underflow in PRINT instruction")
-
-            elif instruction == 0x80: #COMMENT or 128
-                self.program += 2
-
             
         else:
-                raise ValueError(f"Unknown instruction: {instruction}") #instruction isn't known
+                raise ValueError(f"Unknown instruction: {instruction}")
         return self.stack
