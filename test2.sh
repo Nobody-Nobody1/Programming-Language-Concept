@@ -1,1 +1,2 @@
+export PYTHONDONTWRITEBYTECODE=1
 python3 VmDebugger.py
