@@ -14,9 +14,10 @@ class SimpleVM:
             instruction = bytecode[self.program]
 
             if instruction == 0x10 or "PUSH":  # PUSH instruction or 16
-                value = bytecode[self.program + 1]
+                self.program += 1
+                value = bytecode[self.program]
                 self.stack.append(value)
-                self.program += 2
+                
 
             elif instruction == 0x20 or "ADD":  # ADD instruction or 32
                 if len(self.stack) >= 2:
