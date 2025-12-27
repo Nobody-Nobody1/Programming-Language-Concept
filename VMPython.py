@@ -9,7 +9,7 @@ class SimpleVM:
         
         bytecode_length = len(bytecode)
 
-        while bytecode_length <= self.program:
+        while bytecode_length < self.program:
 
             instruction = bytecode[self.program]
 
