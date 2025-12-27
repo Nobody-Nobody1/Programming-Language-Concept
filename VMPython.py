@@ -14,10 +14,13 @@ class SimpleVM:
             instruction = bytecode[self.program]
 
             if instruction == "PUSH":  # PUSH instruction or 16
-                print("hello" + str(self.program))
                 self.program += 1
-                value = bytecode[self.program]
-                self.stack.append(value)
+                value = int(bytecode[self.program])
+                if value.isdigit():
+                    self.stack.append(value)
+                else:
+                    raise ValueError("Invalid value for PUSH instruction")
+                
                 
                 
 
