@@ -107,6 +107,7 @@ class SimpleVM:
             elif instruction == 0xD0 or "HELP": # HELP instruction or 208
                 readme = ReadmeInteracter.display_readme()
                 print(readme)
+                break
             else:
                 raise ValueError(f"Unknown instruction {instruction} at position {self.program}")
         return self.stack
