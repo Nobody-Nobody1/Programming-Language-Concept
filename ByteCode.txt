@@ -1,1 +1,2 @@
-PRINT
+PUSH
+10
