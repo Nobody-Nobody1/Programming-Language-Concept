@@ -104,6 +104,7 @@ class SimpleVM:
                         self.program += 2
                 else:
                     raise ValueError("Stack underflow in JUMPIFZERO instruction")
+            
             elif instruction == 0xD0 or "HELP": # HELP instruction or 208
                 readme = ReadmeInteracter.display_readme()
                 print(readme)
