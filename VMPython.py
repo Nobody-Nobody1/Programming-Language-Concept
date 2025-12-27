@@ -1,3 +1,5 @@
+import ReadmeInteracter
+
 class SimpleVM:
     def __init__(self):
         self.stack = []
@@ -103,7 +105,8 @@ class SimpleVM:
                 else:
                     raise ValueError("Stack underflow in JUMPIFZERO instruction")
             elif instruction == 0xD0 or "HELP": # HELP instruction or 208
-                print("SimpleVM Instructions:")
+                readme = ReadmeInteracter.display_readme()
+                print(readme)
             else:
                 raise ValueError(f"Unknown instruction {instruction} at position {self.program}")
         return self.stack
