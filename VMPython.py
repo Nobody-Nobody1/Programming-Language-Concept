@@ -6,7 +6,6 @@ class SimpleVM:
         self.program = 0
     
     def execute(self, bytecode):
-        self.program = 0  # Reset program counter
         
         bytecode_length = len(bytecode)
 
