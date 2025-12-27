@@ -16,8 +16,9 @@ class SimpleVM:
             if instruction == "PUSH":  # PUSH instruction or 16
                 self.program += 1
                 value = int(bytecode[self.program])
-                if value.isdigit():
+                if isinstance(value, (int, float)):
                     self.stack.append(value)
+                    self.program += 1
                 else:
                     raise ValueError("Invalid value for PUSH instruction")
                 
