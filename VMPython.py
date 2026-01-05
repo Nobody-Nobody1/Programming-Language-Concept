@@ -3,7 +3,7 @@ import ReadmeInteracter
 class SimpleVM:
     def __init__(self):
         self.stack = []
-        self.register{R0:0,R1:0,R2:0
+        self.register{R0:0,R1:0,R2:0}
         self.instruction_pointer = 0
 
     def execute(self, bytecode):
