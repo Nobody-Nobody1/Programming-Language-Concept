@@ -1,88 +1,56 @@
-import ReadmeInteracter
+class VirtualMachine:
+    def __init__(self, memory_size=256):
+        self.registers = [0] * 4  # R0, R1, R2, R3
+        self.memory = [0] * memory_size
+        self.pc = 0  # Program Counter
+        self.running = True
 
-class SimpleVM:
-    def __init__(self):
-        self.stack = []
-        self.register{R0:0,R1:0,R2:0}
-        self.instruction_pointer = 0
+    def load_program(self, program):
+        if len(program) > len(self.memory):
+            raise ValueError("Program too large for memory.")
+        self.memory[:len(program)] = program
 
-    def execute(self, bytecode):
-        while self.instruction_pointer < len(bytecode):
-            instruction = bytecode[self.instruction_pointer]
+    def fetch(self):
+        if self.pc >= len(self.memory):
+            raise RuntimeError("Program counter out of bounds.")
+        byte = self.memory[self.pc]
+        self.pc += 1
+        return byte
 
-            if instruction == "PUSH":  # PUSH instruction
-                self.instruction_pointer += 1
-                value = bytecode[self.instruction_pointer]
-                self.stack.append(value)
+    def run(self):
+        while self.running:
+            opcode = self.fetch()
 
-            elif instruction == "POP":  # POP instruction
-                if self.stack:
-                    self.stack.pop()
-                else:
-                    raise ValueError("Stack underflow in POP instruction")
+            if opcode == 0x01:  # LOAD reg, value
+                reg = self.fetch()
+                value = self.fetch()
+                self.registers[reg] = value
 
-            elif instruction == "ADD":  # ADD instruction
-                if len(self.stack) >= 2:
-                    b = self.stack.pop()
-                    a = self.stack.pop()
-                    self.stack.append(a + b)
-                else:
-                    raise ValueError("Stack underflow in ADD instruction")
-            elif instruction == "SUB":  # SUB instruction
-                if len(self.stack) >= 2:
-                    b = self.stack.pop()
-                    a = self.stack.pop()
-                    self.stack.append(a - b)
-                else:
-                    raise ValueError("Stack underflow in SUB instruction")
-            elif instruction == "MUL":  # MUL instruction
-                if len(self.stack) >= 2:
-                    b = self.stack.pop()
-                    a = self.stack.pop()
-                    self.stack.append(a * b)
-                else:
-                    raise ValueError("Stack underflow in MUL instruction")
-            elif instruction == "DIV":  # DIV instruction
-                if len(self.stack) >= 2:
-                    b = self.stack.pop()
-                    a = self.stack.pop()
-                    if b != 0:
-                        self.stack.append(a // b)
-                    else:
-                        raise ValueError("Division by zero in DIV instruction")
-                else:
-                    raise ValueError("Stack underflow in DIV instruction")
-                
-            elif instruction == "JUMP":  # JUMP instruction
-                self.instruction_pointer += 1
-                target = bytecode[self.instruction_pointer]
-                self.instruction_pointer = target - 1  # -1 to offset the upcoming increment
+            elif opcode == 0x02:  # ADD reg1, reg2
+                r1 = self.fetch()
+                r2 = self.fetch()
+                self.registers[r1] = (self.registers[r1] + self.registers[r2]) & 0xFF  # 8-bit wrap
 
-            elif instruction == "JUMPIFZERO":  # JUMPIFZERO instruction
-                self.instruction_pointer += 1
-                target = bytecode[self.instruction_pointer]
-                if self.stack:
-                    value = self.stack.pop()
-                    if value == 0:
-                        self.instruction_pointer = target - 1  # -1 to offset the upcoming increment
-                else:
-                    raise ValueError("Stack underflow in JUMPIFZERO instruction")
-            
-            elif instruction == "PRINT":  # PRINT instruction
-                if self.stack:
-                    value = self.stack.pop()
-                    print(value)
-                else:
-                    raise ValueError("Stack underflow in PRINT instruction")
-            
-            elif instruction == "HALT":  # HALT instruction
-                break
-            
-            elif instruction == "HELP": # HELP instruction or 208
-                readme = ReadmeInteracter.display_readme()
-                print(readme)
-                break
+            elif opcode == 0x03:  # STORE reg, addr
+                reg = self.fetch()
+                addr = self.fetch()
+                if addr >= len(self.memory):
+                    raise RuntimeError("Memory address out of range.")
+                self.memory[addr] = self.registers[reg]
 
-            self.instruction_pointer += 1
+            elif opcode == 0x04:  # JMP addr
+                addr = self.fetch()
+                if addr >= len(self.memory):
+                    raise RuntimeError("Jump address out of range.")
+                self.pc = addr
 
-        return self.stack
+            elif opcode == 0xFF:  # HALT
+                self.running = False
+
+            else:
+                raise RuntimeError(f"Unknown opcode: {opcode:#04x}")
+
+    def dump_state(self):
+        """Print registers and first 16 bytes of memory."""
+        print("Registers:", self.registers)
+        print("Memory[0:16]:", self.memory[:16])
