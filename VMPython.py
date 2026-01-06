@@ -1,2 +1,4 @@
 class SimpleVM:
-    print("work in progress")
+    def __init__ (self):
+        self.stack = []
+        
