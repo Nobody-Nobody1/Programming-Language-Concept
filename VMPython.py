@@ -51,6 +51,5 @@ class VirtualMachine:
                 raise RuntimeError(f"Unknown opcode: {opcode:#04x}")
 
     def dump_state(self):
-        """Print registers and first 16 bytes of memory."""
         print("Registers:", self.registers)
         print("Memory[0:16]:", self.memory[:16])
