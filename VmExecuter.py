@@ -1,6 +1,5 @@
 from VMPython import VirtualMachine
 
-
 # Example program:
 # R0 = 10
 # R1 = 20
