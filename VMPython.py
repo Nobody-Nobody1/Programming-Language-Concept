@@ -1,55 +1,39 @@
 class VirtualMachine:
-    def __init__(self, memory_size=256):
-        self.registers = [0] * 4  # R0, R1, R2, R3
+    def __init__(self, memory_size, memory_registers):
+        self.registers = [0] * memory_registers
         self.memory = [0] * memory_size
         self.pc = 0  # Program Counter
         self.running = True
 
-    def load_program(self, program):
-        if len(program) > len(self.memory):
-            raise ValueError("Program too large for memory.")
-        self.memory[:len(program)] = program
+    def execute (self, bytecode):
+        with open(bytecode, 'r') as f:
+            program = [int(line.strip(), 16) for line in f if line.strip()]
 
-    def fetch(self):
-        if self.pc >= len(self.memory):
-            raise RuntimeError("Program counter out of bounds.")
-        byte = self.memory[self.pc]
-        self.pc += 1
-        return byte
+        while self.running and self.pc < len(program):
+            opcode = program[self.pc]
 
-    def run(self):
-        while self.running:
-            opcode = self.fetch()
-
-            if opcode == 0x01:  # LOAD reg, value
-                reg = self.fetch()
-                value = self.fetch()
+            if opcode == "LOAD":  # LOAD
+                reg = program[self.pc + 1]
+                value = program[self.pc + 2]
                 self.registers[reg] = value
+                self.pc += 3
 
-            elif opcode == 0x02:  # ADD reg1, reg2
-                r1 = self.fetch()
-                r2 = self.fetch()
-                self.registers[r1] = (self.registers[r1] + self.registers[r2]) & 0xFF  # 8-bit wrap
+            elif opcode == "ADD":  # ADD
+                reg1 = program[self.pc + 1]
+                reg2 = program[self.pc + 2]
+                self.registers[reg1] += self.registers[reg2]
+                self.pc += 3
 
-            elif opcode == 0x03:  # STORE reg, addr
-                reg = self.fetch()
-                addr = self.fetch()
-                if addr >= len(self.memory):
-                    raise RuntimeError("Memory address out of range.")
+            elif opcode == "STORE":  # STORE
+                reg = program[self.pc + 1]
+                addr = program[self.pc + 2]
                 self.memory[addr] = self.registers[reg]
+                self.pc += 3
 
-            elif opcode == 0x04:  # JMP addr
-                addr = self.fetch()
-                if addr >= len(self.memory):
-                    raise RuntimeError("Jump address out of range.")
-                self.pc = addr
-
-            elif opcode == 0xFF:  # HALT
+            elif opcode == "HALT":  # HALT
                 self.running = False
-
+                self.pc += 1
+            
             else:
-                raise RuntimeError(f"Unknown opcode: {opcode:#04x}")
-
-    def dump_state(self):
-        print("Registers:", self.registers)
-        print("Memory[0:16]:", self.memory[:16])
+                print(f"Unknown opcode {opcode} at address {self.pc}")
+                self.running = False
