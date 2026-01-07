@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-class SimpleVM:
-    def __init__ (self):
-        self.stack = []
-        
-=======
 class VirtualMachine:
     def __init__(self, memory_size=256):
         self.registers = [0] * 4  # R0, R1, R2, R3
@@ -59,4 +53,3 @@ class VirtualMachine:
     def dump_state(self):
         print("Registers:", self.registers)
         print("Memory[0:16]:", self.memory[:16])
->>>>>>> parent of 9e1c078 (	modified:   VMPython.py)
