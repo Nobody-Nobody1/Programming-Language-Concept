@@ -42,10 +42,10 @@ class VirtualMachine:
             elif code == 'PRINT':
                 reg = int(instruction[1])
                 print(self.registers[reg])
+            
+            elif code == 'PRINT_MEM':
+                print(self.registers)
 
             elif code == 'HALT':
                 self.running = False
                 break
-
-
-        return self.registers
