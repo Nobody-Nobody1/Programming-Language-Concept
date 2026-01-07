@@ -1,27 +1,29 @@
-virtual machine using hexadecimal commands or text commands
+# NOTES THAT MIGHT BE USEFUL WHEN LOOKING AT THE DOCUMENTATION
 
-run test.sh for actual script and test2.sh to see ByteCodeReader.py convert Bytecode.txt to array
+R1, R2, R3 is going to refer to memeory registers, do not use in actual code since this is only for code documenation
 
-PUSH is 16 and allows you to push the next line after it to self.stack
+All commands aside from the MOVE command use the value already in memory registers
 
-ADD is 32 and allows you to add the top 2 values in self.stack
+All inputs should be split by a comma otherwise you will get an error.
 
-SUB is 48 and allows you to subtract the top 2 values in self.stack
 
-MUL is 64 and allows you to mutliply the top 2 values in self.stack
 
-DIV is 80 and allows you to divide the top 2 values in self.stack
+# COMMANDS WITH EXAMPLES
 
-HALT is 96 and stops when it reaches this
+## DATA MANIPULATION
+MOVE has 2 inputs such as MOVE R1, 10 where R1 is getting 10
 
-PRINT is 112 and prints self.stack
+## MATH COMMANDS
+ADD has 3 inputs such as ADD R1, R2, R3 where R1 + R2 = R3
 
-CLEAR is 128 and clears self.stack fully
+SUB has 3 inputs such as SUB R1, R2, R3 where R1 - R2 = R3
 
-STORE is 144 and removes last index and writes to vm_store.txt
+DIV has 3 inputs such as DIV R1, R2, R3 where R1 // R2 = R3 and if R3 is 0, it raises ZeroDivisionError
 
-LOAD is 160 and adds whatever is in vm_store.txt
+MUL has 3 inputs such as MUL R1, R2, R3 where R1 * R2 = R3
 
-JUMP is 176 and jumps to whatever line the next command is
+## OTHER
 
-JUMPIFZERO is 192 and checks whether popped value from self.stack is 0, if so then it jumps to whatever line the next command is else it doesn't do anything
+HALT has 0 inputs such as HALT where once it reaches this command, it will stop
+
+PRINT has 1 input such as PRINT R1 where it will print whatever is in R1
