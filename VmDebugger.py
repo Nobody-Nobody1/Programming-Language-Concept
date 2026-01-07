@@ -1,6 +1,6 @@
-import ByteCodeReader #converts file into commands
+from ByteCodeReader import Reader as ByteCodeReader
 
 file = 'ByteCode.txt'
-bytecode = ByteCodeReader.read_text_file_to_list(file)
+bytecode = ByteCodeReader.read_bytecode(file)
 
 print(bytecode) #prints the array of bytecode instructions
