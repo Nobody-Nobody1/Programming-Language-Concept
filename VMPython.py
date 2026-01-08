@@ -45,6 +45,10 @@ class VirtualMachine:
             
             elif code == 'PRINT_MEM':
                 print(self.registers)
+            
+            elif code == 'HELP':
+                print("wip")
+                break
 
             elif code == 'HALT':
                 self.running = False
