@@ -49,7 +49,7 @@ class VirtualMachine:
                 print(self.registers)
             
             elif code == 'HELP':
-                print("wip")
+                ReadmeInteracter.
                 break
 
             elif code == 'HALT':
