@@ -49,7 +49,7 @@ class VirtualMachine:
                 print(self.registers)
             
             elif code == 'HELP':
-                ReadmeInteracter.
+                ReadmeInteracter.display_readme()
                 break
 
             elif code == 'HALT':
