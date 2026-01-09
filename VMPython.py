@@ -1,3 +1,5 @@
+import ReadmeInteracter
+
 class VirtualMachine:
     def __init__(self, memory_registers, memory_size):
         self.registers = [0] * memory_registers
