@@ -50,7 +50,6 @@ class VirtualMachine:
             
             elif code == 'HELP':
                 ReadmeInteracter.display_readme()
-                print ("This was at line:", self.pc)
                 break
 
             elif code == 'HALT':
