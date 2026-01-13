@@ -41,12 +41,8 @@ class VirtualMachine:
                 reg3 = int(instruction[3])
                 self.registers[reg3] = self.registers[reg1] * self.registers[reg2]
             
-            elif code == 'PRINT':
-                reg = int(instruction[1])
-                print(self.registers[reg])
-            
             elif code == 'PRINT_MEM':
-                print(self.registers)
+                print (self.registers)
             
             elif code == 'HELP':
                 ReadmeInteracter.display_readme()
@@ -55,3 +51,4 @@ class VirtualMachine:
             elif code == 'HALT':
                 self.running = False
                 break
+        return self.registers

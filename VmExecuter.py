@@ -9,4 +9,8 @@ memory_registers = 4
 bytecode = ByteCodeReader.read_bytecode(program)
 vm = VirtualMachine(memory_registers, memory_size)
 output = vm.execute(bytecode)
-print(output)
+
+if output is None:
+    print("Done")
+else:
+    print("Final Registers State:", output)
