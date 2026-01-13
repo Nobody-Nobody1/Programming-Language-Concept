@@ -2,12 +2,20 @@
    "version": "0.2.0",
    "configurations": [
     
+    
        {
            "name": "Python: VmExecuter",
            "type": "debugpy",
            "request": "launch",
            "program": "${workspaceFolder}/VmExecuter.py",
            "console": "integratedTerminal"
-       }
+       },
+         {
+              "name": "Python: Server",
+              "type": "debugpy",
+              "request": "launch",
+              "program": "${workspaceFolder}/server.py",
+              "console": "integratedTerminal"
+         }
    ]
 }
