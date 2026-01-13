@@ -1,4 +1,4 @@
 MOVE, 0, 10
 MOVE, 1, 20
+PRINT
 ADD, 0, 1, 3
-HELP
