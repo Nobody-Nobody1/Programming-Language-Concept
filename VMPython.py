@@ -7,7 +7,7 @@ class VirtualMachine:
         self.executed_instructions = 0
 
 
-    def execute (self, bytecode, return_output=False):
+    def execute (self, bytecode, return_output=False, debug=False):
         for instruction in bytecode:
             code = instruction[0]
 
@@ -79,5 +79,7 @@ class VirtualMachine:
                 continue
             self.executed_instructions += 1
                 
-        if return_output:
+        if return_output and debug:
+            return self.registers, self.executed_instructions, 
+        elif return_output:
             return self.registers
