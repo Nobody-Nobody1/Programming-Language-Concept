@@ -1,2 +1,0 @@
-export PYTHONDONTWRITEBYTECODE=1
-python VmExecuter.py
