@@ -1,5 +1,8 @@
 class CodeReader:
     def read_file_lines(file_path):
-        for line_number, line in enumerate(open(file_path, 'r')):
-            line = line.strip().split(' ')
-            return line, line_number
+        output = {}
+        with open(file_path, "r") as file:
+            lines = file.readlines()
+            for index, line in enumerate(lines):
+                output[index] = line.strip().split(' ')
+        return output
