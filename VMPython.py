@@ -1,4 +1,6 @@
-import ByteCodeReader
+from ByteCodeReader import CodeReader as reader
 
 class VMPython:
-    pass
+    input = 'ByteCode.txt'
+    output = reader.read_file_lines(input)
+    print(output)
