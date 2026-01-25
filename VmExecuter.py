@@ -1,6 +1,9 @@
-import VMPython as vm
-from ByteCodeReader import CodeReader as reader
+from ByteCodeReader import Reader
+from VMPython import VMPython
 
-class VmExecuter:
-    output = vm.VMPython.execute()
-    print(output)
+bytecode = Reader.read_file_lines('ByteCode.txt')
+output = Reader.find_in_nested_list(bytecode)
+
+execution = VMPython.execute()
+
+print(output)
