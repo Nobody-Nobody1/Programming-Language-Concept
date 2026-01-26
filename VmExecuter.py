@@ -6,4 +6,4 @@ output = Reader.find_in_nested_list(bytecode)
 
 execution = VMPython.execute()
 
-print(output)
+#print(output)

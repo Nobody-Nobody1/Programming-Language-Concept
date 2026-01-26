@@ -1,3 +1,5 @@
-MOVE R1 40
-LOAD
-PRINT R1 40
+store R1 40
+store R2 40
+add R3 R1
+
+print registers_debug
