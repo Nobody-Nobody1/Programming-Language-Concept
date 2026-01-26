@@ -1,53 +1,87 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
+import subprocess
+import sys
 import os
 
-def open_file():
-    """Open a file dialog and display the file contents in the text widget."""
-    file_path = filedialog.askopenfilename(
-        title="Select a file",
-        filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")]
-    )
+def run_file():
+    """Open file dialog, run the selected file, and display its output."""
+    file_path = 'VmExecuter.py'
     
-    if not file_path:  # User canceled
+    if not file_path:
+        return  # User cancelled
+
+    if not os.path.isfile(file_path):
+        messagebox.showerror("Error", "Selected file does not exist.")
         return
-    
+
     try:
-        with open(file_path, "r", encoding="utf-8") as file:
-            content = file.read()
-        
-        text_area.delete("1.0", tk.END)  # Clear previous content
-        text_area.insert(tk.END, content)
-        root.title(f"File Viewer - {os.path.basename(file_path)}")
-    
-    except UnicodeDecodeError:
-        messagebox.showerror("Error", "Cannot read file: Unsupported encoding.")
-    except FileNotFoundError:
-        messagebox.showerror("Error", "File not found.")
+        # Run the file and capture output
+        process = subprocess.Popen(
+            [sys.executable, file_path],  # Runs with current Python interpreter
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        stdout, stderr = process.communicate()
+
+        # Clear previous output
+        output_text.delete("1.0", tk.END)
+
+        # Display stdout
+        if stdout:
+            output_text.insert(tk.END, "=== Output ===\n" + stdout + "\n")
+
+        # Display stderr (if any)
+        if stderr:
+            output_text.insert(tk.END, "=== Errors ===\n" + stderr + "\n")
+
     except Exception as e:
-        messagebox.showerror("Error", f"An error occurred:\n{e}")
+        messagebox.showerror("Execution Error", str(e))
+
+def show_file():
+   file = 'ByteCode.txt'
+   if file:
+       with open(file, 'r', encoding='utf-8') as file:
+           content = file.read()
+           output_text.delete(1.0, tk.END) # Clear previous content
+           output_text.insert(tk.END, content) # Insert new content
+
+def save_file():
+    current_file_path = 'ByteCode.txt'
+        #save directly to the file
+    with open(current_file_path, "w", encoding="utf-8") as file:
+        file.write(output_text.get("1.0", tk.END).rstrip())
+    messagebox.showinfo("Saved", f"Changes saved to:\n{os.path.basename(current_file_path)}")
 
 # Create main window
 root = tk.Tk()
-root.title("File Viewer")
+root.title("Execute VmExecuter and Edit ByteCode")
 root.geometry("600x400")
 
-# Create a menu
+# Create the menu bar
 menu_bar = tk.Menu(root)
-file_menu = tk.Menu(menu_bar, tearoff=0)
-file_menu.add_command(label="Open", command=open_file)
-file_menu.add_separator()
-file_menu.add_command(label="Exit", command=root.quit)
+
+# ----- Menu -----
+file_menu = tk.Menu(menu_bar, tearoff=0)  # tearoff=0 removes dashed line
+file_menu.add_command(label="Run File VmExecuter.py", command=run_file)
+file_menu.add_command(label="Edit ByteCode.txt", command=show_file)
+file_menu.add_command(label="Save Changes", command=save_file)
+file_menu.add_separator()  # Adds a horizontal line
+file_menu.add_command(label="Exit", command=root.destroy)
 menu_bar.add_cascade(label="File", menu=file_menu)
+
+# Text widget to display output
+output_text = tk.Text(root, wrap="word", height=20, width=70)
+output_text.pack(padx=10, pady=10, fill=None, expand=False)
+
+# Scrollbar for output
+scrollbar = tk.Scrollbar(root, command=output_text.yview)
+scrollbar.pack(side="right", fill="y")
+output_text.config(yscrollcommand=scrollbar.set)
+
+# Attach the menu bar to the window
 root.config(menu=menu_bar)
-
-# Create a scrollable text area
-text_area = tk.Text(root, wrap="word")
-scroll_bar = tk.Scrollbar(root, command=text_area.yview)
-text_area.configure(yscrollcommand=scroll_bar.set)
-
-scroll_bar.pack(side=tk.RIGHT, fill=tk.Y)
-text_area.pack(expand=True, fill=tk.BOTH)
 
 # Run the application
 root.mainloop()

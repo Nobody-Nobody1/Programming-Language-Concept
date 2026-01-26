@@ -1,7 +1,5 @@
-store R1 true
-store R2 false
-mark output
-comment stores true into R1 and R2
-logical_operation xor R1 R2
+store R1 10
+store R2 10
+comment stores 10 into R1 and R2
+addition_register R1 R2 R3
 print registers_debug
-print markers_debug
