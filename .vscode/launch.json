@@ -23,6 +23,13 @@
               "request": "launch",
               "program": "${file}",
               "console": "integratedTerminal"
+         },
+         {
+          "name": "Python: TKinkter",
+              "type": "debugpy",
+              "request": "launch",
+              "program": "${workspaceFolder}/Tkinkter.py",
+              "console": "integratedTerminal"
          }
    ]
 }

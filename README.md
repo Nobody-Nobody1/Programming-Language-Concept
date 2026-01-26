@@ -4,3 +4,11 @@
 - based off the LC-3
 - clone repository using ` git clone Nobody-Nobody1/Virtual-Machine`
 - use the run and debug for VmExecuter in vscode to run it
+- change Bytecode.txt to create code
+- has most of the same basic stuff as python and other languages
+- Check VMPython.py in the class Commands for a full list of all commands
+
+
+## FUTURE PLANS
+- make the code possible to make a vm
+- use the programming language to code in a vm
