@@ -58,6 +58,7 @@ def save_file():
 root = tk.Tk()
 root.title("Execute VmExecuter and Edit ByteCode")
 root.geometry("600x400")
+root.wm_attributes("-topmost", True)
 
 # Create the menu bar
 menu_bar = tk.Menu(root)
