@@ -14,7 +14,7 @@
               "name": "Python: Server",
               "type": "debugpy",
               "request": "launch",
-              "program": "${workspaceFolder}/server.py",
+              "program": "${workspaceFolder}/Server.py",
               "console": "integratedTerminal"
          },
          {
