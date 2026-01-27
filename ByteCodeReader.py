@@ -1,9 +1,3 @@
-import tkinter as tk
-import subprocess
-import sys
-import os
-
-
 class Reader:
     def read_file_lines(file_path): #reads lines from a file and returns them as a nested list
         with open(file_path, 'r') as file:
