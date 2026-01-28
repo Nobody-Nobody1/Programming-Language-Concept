@@ -29,7 +29,7 @@ class Commands:
     COMMENT = 'COMMENT' #ignores the line as comment
     #done
     MARK = 'MARK' #marks a position in the code
-
+#adding loops such as if while and for
 class VMPython:
     def execute():
 
