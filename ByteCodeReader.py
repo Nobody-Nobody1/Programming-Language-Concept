@@ -23,3 +23,4 @@ class Reader:
             return False
         else:
             raise ValueError(f"Cannot convert '{string}' to boolean.")
+    

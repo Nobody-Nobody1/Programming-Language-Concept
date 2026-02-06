@@ -1,5 +1,2 @@
-store R1 10
-store R2 10
-comment stores 10 into R1 and R2
-addition_register R1 R2 R3
-print registers_debug
+STORE R1 10
+if

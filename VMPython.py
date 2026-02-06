@@ -217,5 +217,4 @@ class VMPython:
                 Markers.update({marker_name: current_position})
 
             elif instruction_name == Commands.IF:
-                TempLoopName = instruction[1]
-                print (TempLoopName)
+                print(output)
