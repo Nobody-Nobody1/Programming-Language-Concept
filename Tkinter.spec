@@ -5,7 +5,7 @@ a = Analysis(
     ['Tkinter.py'],
     pathex=[],
     binaries=[],
-    datas=[('ByteCode.txt', '.'), ('VmExecuter.py', '.')],
+    datas=[('ByteCode.txt', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
