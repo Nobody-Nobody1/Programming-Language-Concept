@@ -29,7 +29,15 @@ class Commands:
     COMMENT = 'COMMENT' #ignores the line as comment
     #done
     MARK = 'MARK' #marks a position in the code
-#adding loops such as if while and for
+
+    IF = 'IF'
+
+    WHILE = 'WHILE'
+    
+    FOR = 'FOR'
+
+    LOOP_END = 'LOOP_END'
+    
 class VMPython:
     def execute():
 
@@ -207,3 +215,7 @@ class VMPython:
                 marker_name = instruction[1]
                 current_position = bytecode.index(instruction) + 1
                 Markers.update({marker_name: current_position})
+
+            elif instruction_name == Commands.IF:
+                TempLoopName = instruction[1]
+                print (TempLoopName)
