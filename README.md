@@ -1,8 +1,12 @@
 # HOW TO USE
+- Download the exe file in dist folder and run from file explorer since it's not signed
 - use the run and debug for VmExecuter in vscode to run it by editing Bytecode.txt
-- use the run and debug for Tkinter ide in vscode to get a gui interface and click file to provide options for editing Bytecode.txt
+- use the run and debug for Tkinter ide in vscode to get a code IDE and click file to provide options for editing Bytecode.txt
 - has most of the same basic stuff as python and other languages
 - Check VMPython.py in the class Commands for a full list of all commands
+
+# MISTAKES
+- SAVE CHANGES TO BYTECODE.TXT BEFORE EXECUTING IT IN THE CODE IDE
 
 ## Instruction set reference
 

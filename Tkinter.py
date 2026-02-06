@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import messagebox, messagebox as messagebox
 import subprocess
 import sys
 import os
