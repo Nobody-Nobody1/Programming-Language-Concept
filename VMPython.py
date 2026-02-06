@@ -29,13 +29,13 @@ class Commands:
     COMMENT = 'COMMENT' #ignores the line as comment
     #done
     MARK = 'MARK' #marks a position in the code
-
+    #done
     IF = 'IF'
-
+    #done
     WHILE = 'WHILE'
-    
+    #done
     FOR = 'FOR'
-
+    #done
     LOOP_END = 'LOOP_END'
     
 class VMPython:
@@ -43,10 +43,91 @@ class VMPython:
 
         Registers = {'CompareFlag': 0, 'LOGIC_FLAG': False}  # Initialize flags for usage
         Markers = {}  # To store marked positions for jumps
+        LoopStack = []  # Stack for loop/if contexts
 
-        for instruction in bytecode:
+        def eval_operand(token):
+            # Return integer or original value of token: lookup in registers if present, else parse as int if possible.
+            if token is None:
+                return None
+            token_str = str(token)
+            # If token matches a register name, return its stored value
+            if token_str in Registers:
+                return Registers[token_str]
+            # try parse int
+            try:
+                return int(token_str)
+            except:
+                # not a number or a register - return as-is (strings allowed for PRINT etc.)
+                return token_str
 
-            instruction_name = instruction[0].upper()
+        def eval_int(token):
+            # Return integer value, whether token is a register name or literal. Raise ValueError if not int-convertible.
+            val = eval_operand(token)
+            return int(val)
+
+        def eval_condition(left_tok, op_tok, right_tok):
+            left = eval_operand(left_tok)
+            right = eval_operand(right_tok)
+            op = str(op_tok).strip()
+            # normalize boolean-like values
+            try:
+                # attempt numeric comparison when possible
+                if isinstance(left, str) and left.isdigit():
+                    left = int(left)
+                if isinstance(right, str) and right.isdigit():
+                    right = int(right)
+            except:
+                pass
+            if op in ('==', 'EQ', '='):
+                return left == right
+            if op in ('!=', 'NE'):
+                return left != right
+            if op in ('>', 'GT'):
+                return left > right
+            if op in ('<', 'LT'):
+                return left < right
+            if op in ('>=', 'GTE'):
+                return left >= right
+            if op in ('<=', 'LTE'):
+                return left <= right
+            # logical ops
+            if op.upper() == 'AND':
+                return bool(left) and bool(right)
+            if op.upper() == 'OR':
+                return bool(left) or bool(right)
+            # fallback - equality
+            return left == right
+
+        def find_matching_end(start_ip):
+            # Find the matching LOOP_END for a block that starts at start_ip.
+            # Accounts for nested IF/FOR/WHILE blocks.
+            depth = 0
+            ip = start_ip
+            while ip < len(bytecode):
+                instr = bytecode[ip]
+                if not instr:
+                    ip += 1
+                    continue
+                name = str(instr[0]).upper()
+                if name in (Commands.IF, Commands.WHILE, Commands.FOR):
+                    depth += 1
+                elif name == Commands.LOOP_END:
+                    if depth == 0:
+                        return ip
+                    else:
+                        depth -= 1
+                ip += 1
+            return None  # not found
+
+        ip = 0
+        while ip < len(bytecode):
+
+            instruction = bytecode[ip]
+            if not instruction:
+                ip += 1
+                continue
+
+            instruction_name = str(instruction[0]).upper()
                
             if instruction_name == Commands.ADDITION:  # Addition operations
                 value1 = int(instruction[1])
@@ -54,6 +135,7 @@ class VMPython:
                 register = instruction[3]
                 register_value = value1 + value2
                 Registers.update({register: register_value})
+                ip += 1
             
             elif instruction_name == Commands.ADDITION_REGISTER: # Addition operations using registers
                 value1 = int(Registers.get(instruction[1]))
@@ -61,15 +143,15 @@ class VMPython:
                 register = instruction[3]
                 register_value = value1 + value2
                 Registers.update({register: register_value})
+                ip += 1
 
-            
-                
             elif instruction_name == Commands.SUBTRACT: #subtraction operations
                 value1 = int(instruction[1])
                 value2 = int(instruction[2])
                 register = instruction[3]
                 register_value = value1 - value2
                 Registers.update({register: register_value})
+                ip += 1
 
             elif instruction_name == Commands.SUBTRACT_REGISTER: #subtraction operations using registers
                 value1 = int(Registers.get(instruction[1]))
@@ -77,144 +159,218 @@ class VMPython:
                 register = instruction[3]
                 register_value = value1 - value2
                 Registers.update({register: register_value})
+                ip += 1
 
-
-                
             elif instruction_name == Commands.MULTIPLY: #multiplication operations
                 value1 = int(instruction[1])
                 value2 = int(instruction[2])
                 register = instruction[3]
                 register_value = value1 * value2
                 Registers.update({register: register_value})
-            
-            elif instruction_name == Commands.MULTIPLY_REGISTER: #multiplication operations using registers
+                ip += 1
+
+            elif instruction_name == Commands.MULTIPLY_REGISTER:
                 value1 = int(Registers.get(instruction[1]))
                 value2 = int(Registers.get(instruction[2]))
                 register = instruction[3]
                 register_value = value1 * value2
                 Registers.update({register: register_value})
+                ip += 1
 
-
-                
-            elif instruction_name == Commands.DIVIDE: #division operations
+            elif instruction_name == Commands.DIVIDE:
                 value1 = int(instruction[1])
                 value2 = int(instruction[2])
-                if value2 == 0:
-                    raise ZeroDivisionError("Division by zero is not allowed.")
                 register = instruction[3]
-                register_value = value1 / value2
+                register_value = value1 // value2
                 Registers.update({register: register_value})
-            
-            elif instruction_name == Commands.DIVIDE_REGISTER: #division operations using registers
+                ip += 1
+
+            elif instruction_name == Commands.DIVIDE_REGISTER:
                 value1 = int(Registers.get(instruction[1]))
                 value2 = int(Registers.get(instruction[2]))
-                if value2 == 0:
-                    raise ZeroDivisionError("Division by zero is not allowed.")
                 register = instruction[3]
-                register_value = value1 / value2
+                register_value = value1 // value2
                 Registers.update({register: register_value})
+                ip += 1
 
-
-            
-            elif instruction_name == Commands.COMPARE: #comparison operation
+            elif instruction_name == Commands.COMPARE:
                 value1 = int(instruction[1])
                 value2 = int(instruction[2])
-                register = 'CompareFlag'
-                comparison_parameter = int(instruction[3]) #0 equal, 1 greater, 2 less
-                if comparison_parameter == 0:
-                    if value1 == value2: #0 for equal
-                        Registers.update({register: 1})
-                    else:
-                        Registers.update({register: 0})
-                elif comparison_parameter == 1: #1 for greater
-                    if value1 > value2:
-                        Registers.update({register: 1})
-                    else:
-                        Registers.update({register: 0})
-                elif comparison_parameter == 2: #2 for less
-                    if value1 < value2:
-                        Registers.update({register: 1})
-                    else:
-                        Registers.update({register: 0})
-                
-            elif instruction_name == Commands.COMPARE_REGISTER: #comparison operation using registers
+                # simple comparison result stored in CompareFlag (0 false, 1 true)
+                Registers['CompareFlag'] = 1 if value1 == value2 else 0
+                ip += 1
+
+            elif instruction_name == Commands.COMPARE_REGISTER:
                 value1 = int(Registers.get(instruction[1]))
                 value2 = int(Registers.get(instruction[2]))
-                register = 'CompareFlag'
-                comparison_parameter = int(instruction[3]) #0 equal, 1 greater, 2 less
-                if comparison_parameter == 0:
-                    if value1 == value2: #0 for equal
-                        Registers.update({register: 1})
-                    else:
-                        Registers.update({register: 0})
-                elif comparison_parameter == 1: #1 for greater
-                    if value1 > value2:
-                        Registers.update({register: 1})
-                    else:
-                        Registers.update({register: 0})
-                elif comparison_parameter == 2: #2 for less
-                    if value1 < value2:
-                        Registers.update({register: 1})
-                    else:
-                        Registers.update({register: 0})
+                Registers['CompareFlag'] = 1 if value1 == value2 else 0
+                ip += 1
 
+            elif instruction_name == Commands.LOGICAL_OPERATIONS:
+                op = instruction[1].upper()
+                r1 = Registers.get(instruction[2])
+                r2 = Registers.get(instruction[3]) if len(instruction) > 3 else None
+                if op == 'AND':
+                    Registers['LOGIC_FLAG'] = bool(r1) and bool(r2)
+                elif op == 'OR':
+                    Registers['LOGIC_FLAG'] = bool(r1) or bool(r2)
+                elif op == 'NOT':
+                    Registers['LOGIC_FLAG'] = not bool(r1)
+                ip += 1
 
-
-            elif instruction_name == Commands.LOGICAL_OPERATIONS: #logical operations
-                operation = instruction[1].upper()  # logical operation type
-                value0 = Registers.get(instruction[2])
-                value1 = Reader.string_to_bool(value0) #prepares first value
-                value2 = Registers.get(instruction[3]) 
-                value3 = Reader.string_to_bool(value2) #prepares second value
-                register = 'LOGIC_FLAG'
-                if operation == 'AND':
-                    result = value1 and value3
-                    Registers.update({register: result})
-                elif operation == 'OR':
-                    result = value1 or value3
-                    Registers.update({register: result})
-                elif operation == 'XOR':
-                    result = value1 ^ value3
-                    Registers.update({register: result})
-                elif operation == 'NOT':
-                    result = not value1
-                    Registers.update({register: result})
-
-
-
-            elif instruction_name == Commands.STORE: #stores value in register
+            elif instruction_name == Commands.STORE:
                 register = instruction[1]
                 value = instruction[2]
-                if value in Registers: #checks if the value is in registers
-                    value = Registers[value]
-                Registers.update({register: value})
-            
-
+                # allow storing evaluated operand (so you can STORE x 5 or STORE x y)
+                Registers.update({register: eval_operand(value)})
+                ip += 1
 
             elif instruction_name == Commands.PRINT:
-                value = instruction[1]
-                if value == 'registers_debug': #checks for special print command
-                    print(Registers)
-                elif value == 'markers_debug':
-                    print(Markers)
-                elif value == 'bytecode_debug':
-                    print(bytecode)
-                elif value == 'output_debug':
-                    print(output)
-                elif value in Registers: #checks if the value is in registers
-                    value = Registers[value]
-
-
+                # PRINT <register_or_value>
+                arg = instruction[1] if len(instruction) > 1 else None
+                val = eval_operand(arg)
+                print(val)
+                ip += 1
 
             elif instruction_name == Commands.COMMENT:
-                continue  # Ignore comments
-                
-        
-        
+                # ignore
+                ip += 1
+
             elif instruction_name == Commands.MARK:
-                marker_name = instruction[1]
-                current_position = bytecode.index(instruction) + 1
-                Markers.update({marker_name: current_position})
+                # MARK <name>
+                if len(instruction) > 1:
+                    name = str(instruction[1])
+                    Markers[name] = ip
+                ip += 1
 
             elif instruction_name == Commands.IF:
-                print(output)
+                # IF <left_register_or_value> <op> <right_register_or_value>
+                left = instruction[1]
+                op = instruction[2]
+                right = instruction[3]
+                cond = eval_condition(left, op, right)
+                # push IF context so we know how to handle LOOP_END
+                LoopStack.append({'type': 'IF', 'start_ip': ip})
+                if cond:
+                    ip += 1
+                else:
+                    # skip to matching LOOP_END
+                    end_ip = find_matching_end(ip + 1)
+                    if end_ip is None:
+                        raise Exception("IF without matching LOOP_END at ip {}".format(ip))
+                    # pop the IF context (we won't wait for LOOP_END)
+                    LoopStack.pop()
+                    ip = end_ip + 1
+
+            elif instruction_name == Commands.WHILE:
+                # WHILE <left_reg_or_value> <op> <right_reg_or_value>
+                left = instruction[1]
+                op = instruction[2]
+                right = instruction[3]
+                cond = eval_condition(left, op, right)
+                # push WHILE context with token references so we re-evaluate each iteration
+                LoopStack.append({'type': 'WHILE', 'start_ip': ip, 'left_token': left, 'op': op, 'right_token': right})
+                if cond:
+                    ip += 1
+                else:
+                    # skip to matching LOOP_END and pop context
+                    end_ip = find_matching_end(ip + 1)
+                    if end_ip is None:
+                        raise Exception("WHILE without matching LOOP_END at ip {}".format(ip))
+                    LoopStack.pop()
+                    ip = end_ip + 1
+
+            elif instruction_name == Commands.FOR:
+                # FOR <loop_register> <start_reg_or_value> <end_reg_or_value> <step_reg_or_value?>
+                reg = instruction[1]
+                start_token = instruction[2]
+                end_token = instruction[3]
+                step_token = instruction[4] if len(instruction) > 4 else '1'
+                # initialize loop register from evaluated start token
+                Registers[reg] = eval_operand(start_token)
+                # push FOR context with token references (so end/step can be registers that change)
+                LoopStack.append({
+                    'type': 'FOR',
+                    'start_ip': ip,
+                    'reg': reg,
+                    'end_token': end_token,
+                    'step_token': step_token
+                })
+                # decide whether to enter loop by evaluating current value vs end
+                try:
+                    step_val = eval_int(step_token)
+                    curr_val = eval_int(reg)
+                    end_val = eval_int(end_token)
+                except Exception as e:
+                    # if conversion fails, treat values as equal/non-numeric boolean check
+                    step_val = 1
+                    curr_val = eval_operand(reg)
+                    end_val = eval_operand(end_token)
+                if (int(step_val) > 0 and int(curr_val) <= int(end_val)) or (int(step_val) < 0 and int(curr_val) >= int(end_val)):
+                    ip += 1
+                else:
+                    # skip to matching LOOP_END and pop context
+                    end_ip = find_matching_end(ip + 1)
+                    if end_ip is None:
+                        raise Exception("FOR without matching LOOP_END at ip {}".format(ip))
+                    LoopStack.pop()
+                    ip = end_ip + 1
+
+            elif instruction_name == Commands.LOOP_END:
+                if not LoopStack:
+                    # unmatched LOOP_END, just continue
+                    ip += 1
+                    continue
+                ctx = LoopStack[-1]
+                if ctx['type'] == 'IF':
+                    # end of IF block: simply pop
+                    LoopStack.pop()
+                    ip += 1
+                elif ctx['type'] == 'WHILE':
+                    # re-evaluate condition from stored tokens; if true jump back to start+1; else pop and continue after LOOP_END
+                    left = ctx['left_token']
+                    op = ctx['op']
+                    right = ctx['right_token']
+                    cond = eval_condition(left, op, right)
+                    if cond:
+                        # jump back to instruction right after the WHILE start
+                        ip = ctx['start_ip'] + 1
+                    else:
+                        LoopStack.pop()
+                        ip += 1
+                elif ctx['type'] == 'FOR':
+                    # increment register using evaluated step token, and re-evaluate end token each iteration
+                    reg = ctx['reg']
+                    step_token = ctx['step_token']
+                    end_token = ctx['end_token']
+                    try:
+                        step_val = eval_int(step_token)
+                    except:
+                        step_val = int(eval_operand(step_token))
+                    # increment loop register
+                    try:
+                        Registers[reg] = int(Registers.get(reg)) + int(step_val)
+                    except:
+                        # fallback if stored as non-int convertible
+                        Registers[reg] = eval_operand(reg)
+                    # re-evaluate current and end values from tokens (allows end to be a register that changes)
+                    try:
+                        curr = eval_int(reg)
+                        end_val = eval_int(end_token)
+                    except:
+                        curr = eval_operand(reg)
+                        end_val = eval_operand(end_token)
+                    if (int(step_val) > 0 and int(curr) <= int(end_val)) or (int(step_val) < 0 and int(curr) >= int(end_val)):
+                        # loop again: jump back to instruction after FOR
+                        ip = ctx['start_ip'] + 1
+                    else:
+                        # done
+                        LoopStack.pop()
+                        ip += 1
+                else:
+                    # unknown context type; pop and continue
+                    LoopStack.pop()
+                    ip += 1
+            else:
+                # unknown instruction: skip
+                ip += 1

@@ -56,7 +56,7 @@ def save_file():
 
 # Create main window
 root = tk.Tk()
-root.title("Execute VmExecuter and Edit ByteCode")
+root.title("Code IDE")
 root.geometry("600x400")
 root.wm_attributes("-topmost", True)
 

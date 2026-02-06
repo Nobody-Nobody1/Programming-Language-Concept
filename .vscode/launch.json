@@ -25,10 +25,10 @@
               "console": "integratedTerminal"
          },
          {
-          "name": "Python: TKinkter",
+          "name": "Python: TKinter",
               "type": "debugpy",
               "request": "launch",
-              "program": "${workspaceFolder}/Tkinkter.py",
+              "program": "${workspaceFolder}/Tkinter.py",
               "console": "integratedTerminal"
          }
    ]

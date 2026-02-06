@@ -1,2 +1,6 @@
-STORE R1 10
-if
+store start 0
+store end 10
+store step 1
+for i start end step
+print i
+loop_end
