@@ -5,7 +5,7 @@ import sys
 import os
 
 def run_file():
-    """Open file dialog, run the selected file, and display its output."""
+    #open file and display its contents
     file_path = 'VmExecuter.py'
     
     if not file_path:
