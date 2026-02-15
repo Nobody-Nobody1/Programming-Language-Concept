@@ -3,22 +3,58 @@ from tkinter import messagebox, messagebox as messagebox
 import subprocess
 import sys
 import os
+import shutil
+import tempfile
 
-def run_file():
+def get_temp_copy(filename):
+    # Returns the path to a temporary copy of a bundled file.
+    # Determine base path (inside _MEIPASS when frozen)
+    #todo: make 2 versions of this function, one for when the file is bundled and one for when it is not, and use the appropriate one based on the environment
+
+    if getattr(sys, 'frozen', False):
+        base_path = sys._MEIPASS  # Temporary extraction folder for PyInstaller
+    else:
+        base_path = os.path.dirname(os.path.abspath(__file__))
+
+    source_path = os.path.join(base_path, filename)
+
+    if not os.path.exists(source_path):
+        raise FileNotFoundError(f"Bundled file '{filename}' not found.")
+
+    # Create a temp copy
+    temp_dir = tempfile.mkdtemp()
+    temp_path = os.path.join(temp_dir, filename)
+    shutil.copy2(source_path, temp_path)
+
+    return temp_path
+
+if __name__ == "__main__":
+    try:
+        temp_file_path = get_temp_copy("VmExecuter.py")
+        print(f"Temporary copy created at: {temp_file_path}")
+        # You can now run or import this file if needed
+    except Exception as e:
+        print(f"Error: {e}")
+
+
+
+
+
+
+def run_file(temp_file_path):
     #open file and display its contents``
-    file_path = 'VmExecuter.py'
     
-    if not file_path:
+    if not temp_file_path:
         return  # User cancelled
 
-    if not os.path.isfile(file_path):
+    if not os.path.isfile(temp_file_path):
         messagebox.showerror("Error", "Selected file does not exist.")
         return
 
     try:
         # Run the file and capture output
         process = subprocess.Popen(
-            [sys.executable, file_path],  # Runs with current Python interpreter
+            [sys.executable, temp_file_path],  # Runs with current Python interpreter
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True
