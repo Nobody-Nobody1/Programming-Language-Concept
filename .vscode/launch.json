@@ -25,7 +25,7 @@
               "console": "integratedTerminal"
          },
          {
-          "name": "Python: TKinter",
+              "name": "Python: TKinter",
               "type": "debugpy",
               "request": "launch",
               "program": "${workspaceFolder}/Tkinter.py",
